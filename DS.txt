@@ -1,0 +1,242 @@
+#include <iostream>
+#include <vector>
+#include <string>
+#include <limits>
+
+using namespace std;
+
+class CourseSystem {
+private:
+    vector<string> courses;
+    vector<vector<int> > graph;
+
+    int findCourse(string name) {
+        for (int i = 0; i < courses.size(); i++) {
+            if (courses[i] == name)
+                return i;
+        }
+        return -1;
+    }
+
+public:
+
+    // Add a new course
+    void addCourse() {
+        string name;
+
+        cout << "Enter course name: ";
+        getline(cin, name);
+
+        if (findCourse(name) != -1) {
+            cout << "Course already exists!\n";
+            return;
+        }
+
+        courses.push_back(name);
+        graph.push_back(vector<int>());
+
+        cout << "Course added successfully!\n";
+    }
+
+    // Add prerequisite
+    void addPrerequisite() {
+        string prerequisite, course;
+
+        cout << "Enter prerequisite course: ";
+        getline(cin, prerequisite);
+
+        cout << "Enter dependent course: ";
+        getline(cin, course);
+
+        int p = findCourse(prerequisite);
+        int c = findCourse(course);
+
+        if (p == -1 || c == -1) {
+            cout << "Course not found!\n";
+            return;
+        }
+
+        if (p == c) {
+            cout << "A course cannot be its own prerequisite!\n";
+            return;
+        }
+
+        for (int i = 0; i < graph[p].size(); i++) {
+            if (graph[p][i] == c) {
+                cout << "Prerequisite already exists!\n";
+                return;
+            }
+        }
+
+        graph[p].push_back(c);
+
+        cout << "Prerequisite added successfully!\n";
+    }
+
+    // Remove course
+    void removeCourse() {
+        string name;
+
+        cout << "Enter course to remove: ";
+        getline(cin, name);
+
+        int index = findCourse(name);
+
+        if (index == -1) {
+            cout << "Course not found!\n";
+            return;
+        }
+
+        courses.erase(courses.begin() + index);
+        graph.erase(graph.begin() + index);
+
+        for (int i = 0; i < graph.size(); i++) {
+            for (int j = 0; j < graph[i].size(); j++) {
+
+                if (graph[i][j] == index) {
+                    graph[i].erase(graph[i].begin() + j);
+                    j--;
+                }
+                else if (graph[i][j] > index) {
+                    graph[i][j]--;
+                }
+            }
+        }
+
+        cout << "Course removed successfully!\n";
+    }
+
+    // Display prerequisites
+    void displayPrerequisites() {
+        string name;
+
+        cout << "Enter course name: ";
+        getline(cin, name);
+
+        int index = findCourse(name);
+
+        if (index == -1) {
+            cout << "Course not found!\n";
+            return;
+        }
+
+        cout << "\nPrerequisites for " << name << ":\n";
+
+        bool found = false;
+
+        for (int i = 0; i < graph.size(); i++) {
+            for (int j = 0; j < graph[i].size(); j++) {
+
+                if (graph[i][j] == index) {
+                    cout << "- " << courses[i] << endl;
+                    found = true;
+                }
+            }
+        }
+
+        if (!found)
+            cout << "No prerequisites found.\n";
+    }
+
+    // Display dependent courses
+    void displayDependents() {
+        string name;
+
+        cout << "Enter course name: ";
+        getline(cin, name);
+
+        int index = findCourse(name);
+
+        if (index == -1) {
+            cout << "Course not found!\n";
+            return;
+        }
+
+        cout << "\nCourses dependent on " << name << ":\n";
+
+        if (graph[index].empty()) {
+            cout << "No dependent courses found.\n";
+            return;
+        }
+
+        for (int i = 0; i < graph[index].size(); i++) {
+            cout << "- " << courses[graph[index][i]] << endl;
+        }
+    }
+
+    // Display all courses
+    void displayCourses() {
+        cout << "\nAvailable Courses:\n";
+
+        if (courses.empty()) {
+            cout << "No courses available.\n";
+            return;
+        }
+
+        for (int i = 0; i < courses.size(); i++) {
+            cout << i + 1 << ". " << courses[i] << endl;
+        }
+    }
+};
+
+int main() {
+
+    CourseSystem system;
+    int choice;
+
+    do {
+        cout << "\n===== UNIVERSITY COURSE PREREQUISITE SYSTEM =====\n";
+        cout << "1. Add Course\n";
+        cout << "2. Add Prerequisite\n";
+        cout << "3. Remove Course\n";
+        cout << "4. Display Prerequisites\n";
+        cout << "5. Display Dependent Courses\n";
+        cout << "6. Display All Courses\n";
+        cout << "0. Exit\n";
+
+        cout << "\nEnter your choice: ";
+        cin >> choice;
+
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        switch (choice) {
+
+            case 1:
+                system.addCourse();
+                break;
+
+            case 2:
+                system.addPrerequisite();
+                break;
+
+            case 3:
+                system.removeCourse();
+                break;
+
+            case 4:
+                system.displayPrerequisites();
+                break;
+
+            case 5:
+                system.displayDependents();
+                break;
+
+            case 6:
+                system.displayCourses();
+                break;
+
+            case 0:
+                cout << "Thank you for using the system!\n";
+                break;
+
+            default:
+                cout << "Invalid choice! Try again.\n";
+        }
+
+    } while (choice != 0);
+
+    return 0;
+}
+
+
+
